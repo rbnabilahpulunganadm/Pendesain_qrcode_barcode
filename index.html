@@ -13,7 +13,6 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <!-- Tambahkan jsPDF untuk unduh PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/svg2pdf.js@2.2.2/dist/svg2pdf.umd.min.js"></script>
     
     <!-- Gaya CSS untuk aplikasi -->
     <style>
@@ -24,19 +23,11 @@
 
         /* Animasi Pembuka */
         #opening-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #111827;
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #111827; z-index: 9999; display: flex;
+            justify-content: center; align-items: center;
             transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
         }
-
         .logo-container { animation: pulse 2s infinite ease-in-out; }
         .logo-svg { width: 100px; height: 100px; animation: rotate-in 2.5s forwards; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
@@ -53,11 +44,9 @@
         /* Gaya Tombol */
         .glowing-btn { position: relative; overflow: hidden; }
         .glowing-btn:hover::before {
-            content: ''; position: absolute; top: 50%; left: 50%;
-            width: 200%; padding-bottom: 200%; border-radius: 50%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 60%);
-            transform: translate(-50%, -50%) scale(0);
-            animation: ripple 0.6s linear forwards;
+            content: ''; position: absolute; top: 50%; left: 50%; width: 200%; padding-bottom: 200%;
+            border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 60%);
+            transform: translate(-50%, -50%) scale(0); animation: ripple 0.6s linear forwards;
         }
         @keyframes ripple { to { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
         
@@ -70,6 +59,26 @@
         .color-picker-wrapper input[type="color"] { width: 2.5rem; height: 2.5rem; border: none; padding: 0; background: none; border-radius: 0.375rem; cursor: pointer; }
         .color-picker-wrapper input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         .color-picker-wrapper input[type="color"]::-webkit-color-swatch { border: none; border-radius: 0.375rem; }
+
+        /* Style untuk upload logo */
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+            border: 2px dashed #4b5563;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .file-upload-wrapper:hover { border-color: #38bdf8; }
+        .file-upload-wrapper input[type="file"] {
+            position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;
+        }
+        .file-upload-wrapper span { color: #9ca3af; }
+        .logo-preview { max-width: 60px; max-height: 60px; margin-top: 10px; border-radius: 4px; }
     </style>
 </head>
 <body class="text-white overflow-x-hidden">
@@ -94,16 +103,13 @@
         <!-- Main Content -->
         <main class="w-full max-w-2xl bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6 fade-in-up" style="animation-delay: 2.8s;">
             
-            <!-- Input Data -->
             <div>
                 <label for="data-input" class="block text-sm font-medium text-gray-300 mb-2">Masukkan Teks atau URL:</label>
-                <textarea id="data-input" rows="4" class="w-full bg-gray-900/70 border border-gray-700 rounded-lg p-3 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-300" placeholder="Contoh: https://www.google.com"></textarea>
+                <textarea id="data-input" rows="4" class="w-full bg-gray-900/70 border border-gray-700 rounded-lg p-3 focus:ring-2 focus:ring-sky-500" placeholder="Contoh: https://www.google.com"></textarea>
             </div>
-
-            <!-- Pilihan Tipe Kode -->
             <div>
                 <label for="code-type" class="block text-sm font-medium text-gray-300 mb-2">Pilih Tipe Kode:</label>
-                <select id="code-type" class="w-full bg-gray-900/70 border border-gray-700 rounded-lg p-3 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition duration-300">
+                <select id="code-type" class="w-full bg-gray-900/70 border border-gray-700 rounded-lg p-3 focus:ring-2 focus:ring-sky-500">
                     <option value="qrcode">QR Code</option>
                     <option value="CODE128">Barcode (CODE128)</option>
                     <option value="CODE39">Barcode (CODE39)</option>
@@ -112,66 +118,57 @@
             </div>
 
             <!-- Opsi Desain -->
-            <details id="design-options-container" class="bg-gray-900/50 rounded-lg p-4">
-                <summary class="font-semibold cursor-pointer">Opsi Desain</summary>
-                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Warna Latar -->
+            <details id="design-options-container" class="bg-gray-900/50 rounded-lg p-4 transition-all duration-300">
+                <summary class="font-semibold cursor-pointer">Opsi Desain Lanjutan</summary>
+                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label for="bg-color" class="block text-sm font-medium text-gray-300 mb-2">Warna Latar</label>
-                        <div class="color-picker-wrapper">
-                            <input type="color" id="bg-color" value="#FFFFFF">
-                            <input type="text" id="bg-color-text" value="#FFFFFF" class="w-full bg-transparent focus:outline-none">
-                        </div>
+                        <div class="color-picker-wrapper"><input type="color" id="bg-color" value="#FFFFFF"><input type="text" id="bg-color-text" value="#FFFFFF" class="w-full bg-transparent focus:outline-none"></div>
                     </div>
-                    <!-- Warna Foreground -->
                     <div>
                         <label for="fg-color" class="block text-sm font-medium text-gray-300 mb-2">Warna Kode</label>
-                        <div class="color-picker-wrapper">
-                            <input type="color" id="fg-color" value="#000000">
-                             <input type="text" id="fg-color-text" value="#000000" class="w-full bg-transparent focus:outline-none">
-                        </div>
+                        <div class="color-picker-wrapper"><input type="color" id="fg-color" value="#000000"><input type="text" id="fg-color-text" value="#000000" class="w-full bg-transparent focus:outline-none"></div>
                     </div>
-                    <!-- Model Titik QR -->
-                    <div id="qr-dots-style-container">
-                        <label for="qr-dots-style" class="block text-sm font-medium text-gray-300 mb-2">Model Titik QR</label>
-                        <select id="qr-dots-style" class="w-full bg-gray-900/70 border border-gray-700 rounded-lg p-3">
-                            <option value="square">Kotak</option>
-                            <option value="dots">Titik</option>
-                            <option value="rounded">Sudut Melengkung</option>
-                            <option value="extra-rounded">Sangat Melengkung</option>
-                            <option value="classy">Klasik</option>
-                            <option value="classy-rounded">Klasik Melengkung</option>
-                        </select>
+                    
+                    <!-- Opsi Khusus QR Code -->
+                    <div id="qr-options" class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label for="qr-dots-style" class="block text-sm font-medium text-gray-300 mb-2">Model Titik QR</label>
+                            <select id="qr-dots-style" class="w-full bg-gray-900/70 border border-gray-700 rounded-lg p-3">
+                                <option value="square">Kotak</option><option value="dots">Titik</option><option value="rounded">Melengkung</option>
+                                <option value="extra-rounded">Sangat Melengkung</option><option value="classy">Klasik</option><option value="classy-rounded">Klasik Melengkung</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Sisipkan Logo</label>
+                            <div id="logo-upload-container" class="file-upload-wrapper">
+                                <input type="file" id="logo-upload" accept="image/png, image/jpeg, image/svg+xml">
+                                <span id="logo-upload-text">Klik untuk unggah logo</span>
+                                <img id="logo-preview" class="hidden mx-auto logo-preview"/>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </details>
 
-            <!-- Tombol Generate -->
-            <button id="generate-btn" class="glowing-btn w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 shadow-lg shadow-sky-600/30 transform hover:scale-105">
-                Buat Kode
-            </button>
+            <button id="generate-btn" class="glowing-btn w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 shadow-lg shadow-sky-600/30 transform hover:scale-105">Buat Kode</button>
 
             <!-- Tempat Hasil Kode -->
             <div id="result-container" class="mt-6 p-6 bg-gray-900 rounded-xl border border-gray-700 text-center flex justify-center items-center" style="display: none;">
                 <div>
                     <h2 class="text-xl font-semibold mb-4 gradient-text">Hasil Kode Anda</h2>
-                    <div id="canvas-wrapper" class="bg-white rounded-lg inline-block shadow-lg">
-                        <!-- QR Code akan dirender di sini oleh library -->
-                    </div>
+                    <div id="canvas-wrapper" class="bg-white rounded-lg inline-block shadow-lg"></div>
                     <p id="error-message" class="text-red-400 mt-4 font-medium"></p>
-                    <div id="action-buttons" class="mt-4 flex flex-col sm:flex-row gap-3 justify-center" style="display: none;">
-                        <button id="download-png-btn" class="glowing-btn w-full sm:w-auto bg-green-600 hover:bg-green-700 font-semibold py-2 px-5 rounded-lg">PNG</button>
-                        <button id="download-svg-btn" class="glowing-btn w-full sm:w-auto bg-blue-600 hover:bg-blue-700 font-semibold py-2 px-5 rounded-lg">SVG</button>
-                        <button id="download-pdf-btn" class="glowing-btn w-full sm:w-auto bg-red-600 hover:bg-red-700 font-semibold py-2 px-5 rounded-lg">PDF</button>
+                    <div id="action-buttons" class="mt-4 flex flex-wrap gap-3 justify-center" style="display: none;">
+                        <button id="download-png-btn" class="glowing-btn flex-grow sm:flex-grow-0 bg-green-600 hover:bg-green-700 font-semibold py-2 px-5 rounded-lg">PNG</button>
+                        <button id="download-svg-btn" class="glowing-btn flex-grow sm:flex-grow-0 bg-blue-600 hover:bg-blue-700 font-semibold py-2 px-5 rounded-lg">SVG</button>
+                        <button id="download-pdf-btn" class="glowing-btn flex-grow sm:flex-grow-0 bg-red-600 hover:bg-red-700 font-semibold py-2 px-5 rounded-lg">PDF</button>
                     </div>
                 </div>
             </div>
         </main>
         
-        <!-- Panduan & Footer -->
-        <footer class="w-full max-w-2xl text-center text-gray-500 mt-8 pb-4 fade-in-up" style="animation-delay: 3.2s;">
-            <p>&copy; 2025 - Dibuat dengan ❤️ untuk Anda.</p>
-        </footer>
+        <footer class="w-full max-w-2xl text-center text-gray-500 mt-8 pb-4 fade-in-up" style="animation-delay: 3.2s;"><p>&copy; 2025 - Dibuat dengan ❤️ untuk Anda.</p></footer>
     </div>
     
     <div id="toast" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-500"></div>
@@ -180,6 +177,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { document.getElementById('opening-animation').classList.add('hidden'); }, 2500);
 
+            // Elemen UI utama
             const dataInput = document.getElementById('data-input');
             const codeTypeSelect = document.getElementById('code-type');
             const generateBtn = document.getElementById('generate-btn');
@@ -187,48 +185,65 @@
             const canvasWrapper = document.getElementById('canvas-wrapper');
             const errorMessage = document.getElementById('error-message');
             const actionButtons = document.getElementById('action-buttons');
-            const toast = document.getElementById('toast');
             
-            // Elemen Opsi Desain
+            // Elemen Desain
+            const qrOptions = document.getElementById('qr-options');
             const bgColorPicker = document.getElementById('bg-color');
             const fgColorPicker = document.getElementById('fg-color');
             const bgColorText = document.getElementById('bg-color-text');
             const fgColorText = document.getElementById('fg-color-text');
             const qrDotsStyleSelect = document.getElementById('qr-dots-style');
-            const qrDotsStyleContainer = document.getElementById('qr-dots-style-container');
+            
+            // Elemen Logo
+            const logoUpload = document.getElementById('logo-upload');
+            const logoPreview = document.getElementById('logo-preview');
+            const logoUploadText = document.getElementById('logo-upload-text');
 
-            // Tombol Unduh
+            // Tombol Unduh & Notifikasi
             const downloadPngBtn = document.getElementById('download-png-btn');
             const downloadSvgBtn = document.getElementById('download-svg-btn');
             const downloadPdfBtn = document.getElementById('download-pdf-btn');
+            const toast = document.getElementById('toast');
 
-            let qrCodeInstance = null; // Untuk menyimpan instance QR Code
+            let qrCodeInstance = null;
+            let logoUrl = null;
 
-            // Sinkronisasi input text dengan color picker
+            // --- Event Listeners ---
             bgColorPicker.addEventListener('input', (e) => bgColorText.value = e.target.value);
             fgColorPicker.addEventListener('input', (e) => fgColorText.value = e.target.value);
             bgColorText.addEventListener('change', (e) => bgColorPicker.value = e.target.value);
             fgColorText.addEventListener('change', (e) => fgColorPicker.value = e.target.value);
 
-
-            function showToast(message) {
-                toast.textContent = message;
-                toast.classList.remove('translate-x-full');
-                setTimeout(() => { toast.classList.add('translate-x-full'); }, 3000);
-            }
-
             codeTypeSelect.addEventListener('change', () => {
-                qrDotsStyleContainer.style.display = codeTypeSelect.value === 'qrcode' ? 'block' : 'none';
+                qrOptions.style.display = codeTypeSelect.value === 'qrcode' ? 'grid' : 'none';
             });
 
+            logoUpload.addEventListener('change', (event) => {
+                if (event.target.files && event.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        logoUrl = e.target.result;
+                        logoPreview.src = logoUrl;
+                        logoPreview.classList.remove('hidden');
+                        logoUploadText.classList.add('hidden');
+                    };
+                    reader.readAsDataURL(event.target.files[0]);
+                }
+            });
+
+            generateBtn.addEventListener('click', generateCode);
+            downloadPngBtn.addEventListener('click', () => download('png'));
+            downloadSvgBtn.addEventListener('click', () => download('svg'));
+            downloadPdfBtn.addEventListener('click', () => download('pdf'));
+
+            // --- Fungsi-Fungsi ---
             function generateCode() {
                 const data = dataInput.value.trim();
                 const type = codeTypeSelect.value;
 
                 resultContainer.style.display = 'flex';
-                resultContainer.classList.add('fade-in-up');
                 errorMessage.textContent = '';
-                canvasWrapper.innerHTML = ''; // Kosongkan wrapper
+                canvasWrapper.innerHTML = '';
                 actionButtons.style.display = 'none';
 
                 if (!data) {
@@ -241,39 +256,27 @@
 
                 try {
                     if (type === 'qrcode') {
-                        qrCodeInstance = new QRCodeStyling({
-                            width: 256,
-                            height: 256,
-                            data: data,
-                            margin: 10,
-                            dotsOptions: {
-                                color: fgColor,
-                                type: qrDotsStyleSelect.value
-                            },
-                            backgroundOptions: {
-                                color: bgColor,
-                            },
-                            cornersSquareOptions: { color: fgColor },
-                            cornersDotOptions: { color: fgColor },
-                        });
+                        const qrOptions = {
+                            width: 256, height: 256, data: data, margin: 10,
+                            dotsOptions: { color: fgColor, type: qrDotsStyleSelect.value },
+                            backgroundOptions: { color: bgColor },
+                            cornersSquareOptions: { color: fgColor }, cornersDotOptions: { color: fgColor },
+                        };
+                        if (logoUrl) {
+                            qrOptions.image = logoUrl;
+                            qrOptions.imageOptions = { hideBackgroundDots: true, imageSize: 0.4, margin: 6 };
+                        }
+                        qrCodeInstance = new QRCodeStyling(qrOptions);
                         qrCodeInstance.append(canvasWrapper);
                     } else {
-                        qrCodeInstance = null; // Bukan QR Code
+                        qrCodeInstance = null;
                         const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                        svgElement.id = 'barcode';
-                        canvasWrapper.style.backgroundColor = bgColor; // Terapkan BG color ke wrapper
-                        canvasWrapper.style.padding = '10px'; // Tambah padding agar BG terlihat
+                        canvasWrapper.style.backgroundColor = bgColor;
+                        canvasWrapper.style.padding = '10px';
                         canvasWrapper.appendChild(svgElement);
-                        
                         JsBarcode(svgElement, data, {
-                            format: type,
-                            lineColor: fgColor,
-                            width: 2,
-                            height: 100,
-                            displayValue: true,
-                            fontOptions: "bold",
-                            margin: 10,
-                            background: bgColor, // JsBarcode juga punya opsi background
+                            format: type, lineColor: fgColor, background: bgColor,
+                            width: 2, height: 100, displayValue: true, fontOptions: "bold", margin: 10,
                         });
                     }
                     actionButtons.style.display = 'flex';
@@ -288,56 +291,62 @@
                 const filename = `${type}_${Date.now()}`;
                 
                 if (type === 'qrcode' && qrCodeInstance) {
-                    await qrCodeInstance.download({ name: filename, extension: format });
+                    const extension = format === 'pdf' ? 'png' : format; // PDF download for QR lib needs to start from PNG
+                    await qrCodeInstance.download({ name: filename, extension: extension });
+                    
+                    if (format === 'pdf') {
+                        // The library downloads a PNG, we need to convert it to PDF
+                        const blob = await qrCodeInstance.getRawData('png');
+                        const url = URL.createObjectURL(blob);
+                        const img = new Image();
+                        img.onload = () => {
+                            const { jsPDF } = window.jspdf;
+                            const doc = new jsPDF({ orientation: 'p', unit: 'px', format: [img.width + 20, img.height + 20] });
+                            doc.addImage(img, 'PNG', 10, 10, img.width, img.height);
+                            doc.save(`${filename}.pdf`);
+                            URL.revokeObjectURL(url);
+                        };
+                        img.src = url;
+                    }
                     return;
                 }
-
-                // Logika unduh untuk barcode
+                
+                // --- Logika Unduh Barcode (PNG, SVG, PDF) ---
                 const svgElement = canvasWrapper.querySelector('svg');
                 if (!svgElement) return;
 
                 const svgData = new XMLSerializer().serializeToString(svgElement);
                 const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
-                
+
                 if (format === 'svg') {
                     triggerDownload(url, `${filename}.svg`);
-                } else if (format === 'png') {
+                } else if (format === 'png' || format === 'pdf') {
                     const img = new Image();
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
                         const padding = 20;
-                        canvas.width = img.width + padding * 2;
-                        canvas.height = img.height + padding * 2;
+                        const svgWidth = parseFloat(svgElement.getAttribute('width'));
+                        const svgHeight = parseFloat(svgElement.getAttribute('height'));
+                        canvas.width = svgWidth + padding * 2;
+                        canvas.height = svgHeight + padding * 2;
                         const ctx = canvas.getContext('2d');
                         ctx.fillStyle = bgColorPicker.value;
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                         ctx.drawImage(img, padding, padding);
-                        triggerDownload(canvas.toDataURL('image/png'), `${filename}.png`);
+                        
+                        const pngUrl = canvas.toDataURL('image/png');
+                        if (format === 'png') {
+                            triggerDownload(pngUrl, `${filename}.png`);
+                        } else { // format === 'pdf'
+                             const { jsPDF } = window.jspdf;
+                             const doc = new jsPDF({ orientation: 'p', unit: 'px', format: [canvas.width, canvas.height] });
+                             doc.addImage(pngUrl, 'PNG', 0, 0, canvas.width, canvas.height);
+                             doc.save(`${filename}.pdf`);
+                        }
                         URL.revokeObjectURL(url);
                     };
                     img.src = url;
-                } else if (format === 'pdf') {
-                    const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF();
-                    const pdfWidth = doc.internal.pageSize.getWidth();
-                    const pdfHeight = doc.internal.pageSize.getHeight();
-                    const svgWidth = parseFloat(svgElement.getAttribute('width'));
-                    const svgHeight = parseFloat(svgElement.getAttribute('height'));
-                    
-                    const scale = Math.min((pdfWidth - 20) / svgWidth, (pdfHeight - 20) / svgHeight);
-                    const finalWidth = svgWidth * scale;
-                    const finalHeight = svgHeight * scale;
-
-                    const x = (pdfWidth - finalWidth) / 2;
-                    const y = (pdfHeight - finalHeight) / 2;
-
-                    svg2pdf(svgElement, doc, {
-                        x: x, y: y,
-                        width: finalWidth, height: finalHeight
-                    }).then(() => {
-                        doc.save(`${filename}.pdf`);
-                    });
                 }
             }
 
@@ -349,11 +358,6 @@
                 link.click();
                 document.body.removeChild(link);
             }
-
-            generateBtn.addEventListener('click', generateCode);
-            downloadPngBtn.addEventListener('click', () => download('png'));
-            downloadSvgBtn.addEventListener('click', () => download('svg'));
-            downloadPdfBtn.addEventListener('click', () => download('pdf'));
         });
     </script>
 </body>
